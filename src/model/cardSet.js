@@ -39,7 +39,14 @@ export class SpanishDeck {
 
     //TODO use assert
     if (!card) {
-      console.error("GENERATED an undef card", card, randomNumber, randomCardIndex,cardCount, this.deck)
+      console.error(
+        "GENERATED an undef card",
+        card,
+        randomNumber,
+        randomCardIndex,
+        cardCount,
+        this.deck
+      );
     }
 
     return card;

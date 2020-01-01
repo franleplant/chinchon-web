@@ -1,31 +1,32 @@
 /** @jsx jsx */
 import { jsx } from "@emotion/core";
 import css from "@emotion/css/macro";
+import styled from "@emotion/styled/macro";
 import { Global } from "@emotion/core";
+import { DndProvider } from 'react-dnd'
+  import Backend from 'react-dnd-html5-backend'
 
-import Card from "./Card";
-import { SpanishDeck } from "./model/cardSet";
+import GameBoard from "./components/GameBoard";
 
 //TODO
-//- refactor styles into smaller chunks
-//- create a single syle only card that can be used to show reverse or interactions
-//- make the hand sortable
+//- use https://css-tricks.com/draggin-and-droppin-in-react/ instead of react-dnd
+//for a better out of the box experience
 //- hide oponents cards
 //- create a better card reverse (maybe with backgrounds degrade)
 //- add titles to each gameboard part
 //- refactor gameboard into smaller composoable chunks
 
+const Container = styled.div`
+  padding: 10px;
+  background: #f1f4f5;
+  height: 100%;
+  box-sizing: border-box;
+`;
 
 export default function App() {
   return (
-    <div
-      css={css`
-        padding: 10px;
-        background: #f1f4f5;
-        height: 100%;
-        box-sizing: border-box;
-      `}
-    >
+    <Container>
+      <DndProvider backend={Backend}>
       <Global
         styles={css`
           html,
@@ -35,101 +36,8 @@ export default function App() {
           }
         `}
       />
-      {/*
-      {deck.map(card => (
-        <Card key={card.id} card={card} />
-      ))}
-      */}
       <GameBoard />
-    </div>
-  );
-}
-
-export function GameBoard(props) {
-const deck = new SpanishDeck();
-  //const card = deck.drawRandomCard()
-  const hand1 = deck.drawCards(7);
-  const hand2 = deck.drawCards(7);
-  //console.log(hand);
-  //<Card card={card} />
-  const reverse = {
-        id: "REVERSE1",
-        suit: "REVERSE",
-        rank: 1
-      }
-
-  return (
-    <div
-      css={css`
-        display: flex;
-        flex-direction: column;
-        height: 100%;
-      `}
-    >
-      <div
-        css={css`
-          border: 1px solid red;
-          display: flex;
-
-                      align-items: center;
-        padding: 10px;
-          overflow: hidden;
-          flex: 1;
-        `}
-      >
-        {hand1.map(card => {
-          if (!card) {
-            console.log("UNDEF", card)
-          }
-          return (
-            <div css={css`
-                overflow: hidden;
-              `}>
-          <Card key={card.id} card={card} width={150}/>
-          </div>
-        )})}
-      </div>
-    
-      <div
-        css={css`
-          border: 1px solid blue;
-              display: flex;
-                  justify-content: center;
-                      align-items: center;
-
-          flex: 1;
-        `}
-      >
-        <Card card={reverse} />
-        <Card card={deck.drawCard()} />
-      </div>
-
-
-
-
-      <div
-        css={css`
-          border: 1px solid red;
-          display: flex;
-
-                      align-items: center;
-        padding: 10px;
-          overflow: hidden;
-          flex: 1;
-        `}
-      >
-        {hand2.map(card => {
-          if (!card) {
-            console.log("UNDEF", card)
-          }
-          return (
-            <div css={css`
-                overflow: hidden;
-              `}>
-          <Card key={card.id} card={card} width={150}/>
-          </div>
-        )})}
-      </div>
-    </div>
+      </DndProvider>
+    </Container>
   );
 }
