@@ -2,28 +2,32 @@
 import React from "react";
 import { jsx } from "@emotion/core";
 import css from "@emotion/css/macro";
-//import styled from '@emotion/styled/macro'
 import Espada from "./espada.svg";
 import Basto from "./basto.svg";
 import Copa from "./copa.svg";
 import Oro from "./oro.svg";
 
 export default function Card(props) {
-  const { card = {} } = props;
+  const { card = {}, width = 150 } = props;
+
+  const height = width / 0.75
+  console.log("CARD", card, props);
   return (
     <div
       css={css`
-        width: 150px;
+        width: ${width}px;
         display: inline-block;
-        height: 200px;
-        border: 1px solid #ccc;
+        height: ${height}px;
+        //border: 1px solid #ccc;
         border-radius: 3px;
         padding: 10px;
         box-sizing: border-box;
-        box-shadow: 2px 2px 5px #ddd, -3px -3px 4px #fff;
+        box-shadow: 2px 2px 5px rgba(0, 0, 0, 0.5),
+          -3px -3px 4px rgba(255, 255, 255, 0.9);
         background: #f1f4f5;
         margin: 10px;
         overflow: hidden;
+        flex-shrink: 0;
       `}
     >
       <div
@@ -43,6 +47,18 @@ export default function Card(props) {
 }
 
 export function CardContent({ suit, rank }) {
+  if (suit === "REVERSE") {
+    return (
+      <div
+        css={css`
+          margin: 10px;
+          font-weight: bold;
+        `}
+      >
+        REVERSE
+      </div>
+    );
+  }
   if (suit === "JOKER") {
     return (
       <div
@@ -73,6 +89,9 @@ export function CardContent({ suit, rank }) {
     case "ORO": {
       suitImg = Oro;
       break;
+    }
+    default: {
+      throw new Error(`Incorrect card suit`, suit);
     }
   }
 
