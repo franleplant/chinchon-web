@@ -3,8 +3,6 @@ import { jsx } from "@emotion/core";
 import css from "@emotion/css/macro";
 import styled from "@emotion/styled/macro";
 import { Global } from "@emotion/core";
-import { DndProvider } from 'react-dnd'
-  import Backend from 'react-dnd-html5-backend'
 
 import GameBoard from "./components/GameBoard";
 
@@ -26,18 +24,16 @@ const Container = styled.div`
 export default function App() {
   return (
     <Container>
-      <DndProvider backend={Backend}>
-      <Global
-        styles={css`
-          html,
-          body,
-          #root {
-            height: 100%;
-          }
-        `}
-      />
-      <GameBoard />
-      </DndProvider>
+        <Global
+          styles={css`
+            html,
+            body,
+            #root {
+              height: 100%;
+            }
+          `}
+        />
+        <GameBoard />
     </Container>
   );
 }

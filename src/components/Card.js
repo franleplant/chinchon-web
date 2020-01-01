@@ -1,9 +1,9 @@
 /** @jsx jsx */
-import React, {useRef, forwardRef} from "react";
+import React, { useRef, forwardRef } from "react";
 import { jsx } from "@emotion/core";
 import css from "@emotion/css/macro";
 import styled from "@emotion/styled/macro";
-import { useDrag, useDrop } from 'react-dnd'
+import { useDrag, useDrop } from "react-dnd";
 
 import Joker from "./Joker";
 import CardBack from "./CardBack";
@@ -14,6 +14,7 @@ import Copa from "./copa.svg";
 import Oro from "./oro.svg";
 
 const CardContainer = styled.div`
+  cursor: pointer;
   width: ${props => props.width}px;
   display: inline-block;
   height: ${props => props.width / 0.75}px;
@@ -41,20 +42,19 @@ const CardBody = styled.div`
 export const Card = forwardRef((props, ref) => {
   const {
     card = {},
-      width = 100,
-      children = card => <CardContent suit={card.suit} rank={card.rank} />
+    width = 100,
+    children = card => <CardContent suit={card.suit} rank={card.rank} />,
+    ...rest
   } = props;
 
-
   return (
-    <CardContainer width={width} ref={ref}>
+    <CardContainer width={width} ref={ref} {...rest}>
       <CardBody>{children(card)}</CardBody>
     </CardContainer>
   );
+});
 
-})
-
-export default Card
+export default Card;
 
 export function CardContent({ suit, rank }) {
   if (suit === "REVERSE") {

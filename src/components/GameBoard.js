@@ -3,17 +3,19 @@ import { useState, useCallback } from "react";
 import { jsx } from "@emotion/core";
 import css from "@emotion/css/macro";
 import styled from "@emotion/styled/macro";
+import _ from "lodash";
+
+import { DragDropContext, Droppable, Draggable } from "react-beautiful-dnd";
 
 import Card from "./Card";
-import SortableCard from "./SortableCard.js";
 import { SpanishDeck } from "../model/cardSet";
 
-  //TODO replace by static method Card.reverse()
-  const reverse = {
-    id: "REVERSE1",
-    suit: "REVERSE",
-    rank: 1
-  };
+//TODO replace by static method Card.reverse()
+const reverse = {
+  id: "REVERSE1",
+  suit: "REVERSE",
+  rank: 1
+};
 
 const Container = styled.div`
   display: flex;
@@ -31,49 +33,120 @@ const Section = styled.div`
   padding: 10px;
 `;
 
-  //TODO this goes in the server
-  const deck = new SpanishDeck();
-  const hand1 = deck.drawCards(7);
-  const hand2 = deck.drawCards(7);
+//TODO this goes in the server
+const deck = new SpanishDeck();
+const initialState = {
+  deck,
+  hand1: deck.drawCards(7),
+  hand2: deck.drawCards(7),
+  stack: [deck.drawCard()]
+};
 
 export default function GameBoard(props) {
+  const [gameState, setGameState] = useState(initialState);
 
-  const [userHand, setUserHand] = useState(hand2);
+  const onDragEnd = result => {
+    const { source, destination } = result;
 
+    // dropped outside the list
+    if (!destination) {
+      return;
+    }
 
-  // TODO this will probably need to go to the server somehow
-  const moveCard = useCallback(
-    // dragIndex: start index
-    // hoverIndex: end index
-    (dragIndex, hoverIndex) => {
-      const dragingCard = userHand[dragIndex];
-      const userHandClone = userHand.slice()
-      userHandClone.splice(dragIndex, 1)
-      userHandClone.splice(hoverIndex, 0, dragingCard)
+    const newGameState = _.cloneDeep(gameState);
 
-      setUserHand(userHandClone)
-    },
-    [userHand]
+    const dragingCard = newGameState.hand1[source.index];
+
+    if (source.droppableId === destination.droppableId) {
+      newGameState.hand1.splice(source.index, 1);
+      newGameState.hand1.splice(destination.index, 0, dragingCard);
+    } else {
+      // descartar
+      newGameState.hand1.splice(source.index, 1);
+      newGameState.stack.push(dragingCard);
+    }
+
+    setGameState({ ...newGameState });
+  };
+
+  const handleCenterCardClick = card => {
+      const newGameState = _.cloneDeep(gameState);
+    if (card.suit === "REVERSE") {
+      const newCard = newGameState.deck.drawCard();
+      newGameState.hand1.push(newCard);
+    } else {
+      const newCard = newGameState.stack.pop();
+      newGameState.hand1.push(newCard);
+    }
+      setGameState({ ...newGameState });
+  };
+
+  console.log("hand", gameState);
+
+  const stackTop = gameState.stack[gameState.stack.length - 1];
+  const centerCards = [reverse, stackTop];
+  console.log("hand", gameState, centerCards);
+  return (
+    <DragDropContext onDragEnd={onDragEnd}>
+      <Container>
+        <p>Cartas {deck.len()} </p>
+        <Section>
+          {gameState.hand2.map(card => (
+            <Card key={card.id} card={card} />
+          ))}
+        </Section>
+
+        <Droppable droppableId={"deck"} direction="horizontal">
+          {(provided, snapshot) => (
+            <Section ref={provided.innerRef}>
+              {centerCards.filter(Boolean).map((card, index) => (
+                <Card
+                  card={card}
+                  index={index}
+                  key={card.id}
+                  onClick={() => handleCenterCardClick(card)}
+                />
+              ))}
+              {provided.placeholder}
+            </Section>
+          )}
+        </Droppable>
+
+        <DropableSection cards={gameState.hand1} dropableId={"userHand"} />
+      </Container>
+    </DragDropContext>
   );
+}
+
+function DropableSection(props) {
+  const { dropableId, cards } = props;
 
   return (
-    <Container>
-      <Section>
-        {hand1.map(card => (
-          <Card key={card.id} card={card} />
-        ))}
-      </Section>
+    <Droppable droppableId={dropableId} direction="horizontal">
+      {(provided, snapshot) => (
+        <Section ref={provided.innerRef}>
+          {cards.map((card, index) => (
+            <DragableCard card={card} index={index} key={card.id} />
+          ))}
+          {provided.placeholder}
+        </Section>
+      )}
+    </Droppable>
+  );
+}
 
-      <Section>
-        <Card card={reverse} />
-        <Card card={deck.drawCard()} />
-      </Section>
-
-      <Section>
-        {userHand.map((card, index) => (
-          <SortableCard key={card.id} card={card} moveCard={moveCard} index={index} sortItem="YOURHAND"/>
-        ))}
-      </Section>
-    </Container>
+function DragableCard(props) {
+  const { card, index } = props;
+  return (
+    <Draggable key={card.id} draggableId={card.id} index={index}>
+      {(provided, snapshot) => (
+        <Card
+          ref={provided.innerRef}
+          {...provided.draggableProps}
+          {...provided.dragHandleProps}
+          card={card}
+        />
+      )}
+    </Draggable>
   );
 }

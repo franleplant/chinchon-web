@@ -27,6 +27,10 @@ export class SpanishDeck {
     console.log("conchis", this.deck);
   }
 
+  len() {
+    return this.deck.length;
+  }
+
   drawCard() {
     const cardCount = this.deck.length;
     // get a float between 0 and cardCount (exclusive)
